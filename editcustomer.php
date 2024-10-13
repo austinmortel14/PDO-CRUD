@@ -1,56 +1,36 @@
-<?php require_once 'core/dbConfig.php'; ?>
-<?php require_once 'core/models.php'; ?>
+<?php
+include 'dbconfig.php';
+
+if (isset($_GET['CustomerID'])) {
+    $id = $_GET['CustomerID'];
+    $stmt = $pdo->prepare('SELECT * FROM customer_records WHERE CustomerID = ?');
+    $stmt->execute([$id]);
+    $customer = $stmt->fetch();
+}
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<style>
-		body {
-			font-family: "Arial";
-		}
-		input {
-			font-size: 1.5em;
-			height: 50px;
-			width: 200px;
-		}
-		table, th, td {
-		  border:1px solid black;
-		}
-	</style>
+    <title>Edit Customer</title>
 </head>
 <body>
-	<?php $getStudentById = getStudentById($pdo, $_GET['student_id']); ?>
-	<form action="core/handleForms.php?student_id=<?php echo $_GET['student_id']; ?>" method="POST">
-		<p>
-			<label for="firstName">First Name</label> 
-			<input type="text" name="firstName" value="<?php echo $getStudentById['first_name']; ?>">
-		</p>
-		<p>
-			<label for="lastName">Last Name</label> 
-			<input type="text" name="lastName" value="<?php echo $getStudentById['last_name']; ?>">
-		</p>
-		<p>
-			<label for="gender">Gender</label>
-			<input type="text" name="gender" value="<?php echo $getStudentById['gender']; ?>">
-		</p>
-		<p>
-			<label for="yearLevel">Year Level</label>
-			<input type="text" name="yearLevel" value="<?php echo $getStudentById['year_level']; ?>">
-		</p>
-		<p>
-			<label for="section">Section</label>
-			<input type="text" name="section" value="<?php echo $getStudentById['section']; ?>">
-		</p>
-		<p>
-			<label for="adviser">Adviser</label>
-			<input type="text" name="adviser" value="<?php echo $getStudentById['adviser']; ?>"></p>
-		<p>
-			<label for="religion">Religion</label>
-			<input type="text" name="religion" value="<?php echo $getStudentById['religion']; ?>">
-			<input type="submit" name="editStudentBtn">
-		</p>
-	</form>
+<form action="handlesform.php" method="post">
+    <input type="hidden" name="CustomerID" value="<?php echo $customer['CustomerID']; ?>">
+    <label for="CustomerName">Customer Name:</label>
+    <input type="text" name="CustomerName" value="<?php echo $customer['CustomerName']; ?>"><br>
+    <label for="CustomerCarModel">Customer Car Model:</label>
+    <input type="text" name="CustomerCarModel" value="<?php echo $customer['CustomerCarModel']; ?>"><br>
+    <label for="MechanicAssigned">Mechanic Assigned:</label>
+    <input type="text" name="MechanicAssigned" value="<?php echo $customer['MechanicAssigned']; ?>"><br>
+    <label for="ServiceAdviserAssigned">Service Adviser Assigned:</label>
+    <input type="text" name="ServiceAdviserAssigned" value="<?php echo $customer['ServiceAdviserAssigned']; ?>"><br>
+    <label for="ServiceType">Service Type:</label>
+    <input type="text" name="ServiceType" value="<?php echo $customer['ServiceType']; ?>"><br>
+    <label for="CurrentServiceDate">Current Service Date:</label>
+    <input type="date" name="CurrentServiceDate" value="<?php echo $customer['CurrentServiceDate']; ?>"><br>
+    <label for="NextMaintenanceDate">Next Maintenance Date:</label>
+    <input type="date" name="NextMaintenanceDate" value="<?php echo $customer['NextMaintenanceDate']; ?>"><br>
+    <input type="submit" value="Update Customer">
+
 </body>
 </html>
