@@ -1,78 +1,21 @@
-<!-- Functions for interacting with the database -->
+<?php
+include 'dbconfig.php';
 
-<?php 
-
-require_once 'dbConfig.php';
-
-function insertIntoStudentRecords($pdo,$first_name, $last_name, $gender, $yearLevel, $section, $adviser, $religion) {
-
-	$sql = "INSERT INTO student_records (first_name,last_name,gender,year_level,section,adviser,religion) VALUES (?,?,?,?,?,?,?)";
-
-	$stmt = $pdo->prepare($sql);
-
-	$executeQuery = $stmt->execute([$first_name, $last_name, $gender, $yearLevel, 
-		$section, $adviser, $religion]);
-
-	if ($executeQuery) {
-		return true;	
-	}
+function searchCustomers($keyword) {
+    global $pdo;
+    $stmt = $pdo->prepare('SELECT * FROM customer_records WHERE CustomerName LIKE ?');
+    $stmt->execute(['%' . $keyword . '%']);
+    return $stmt->fetchAll();
 }
 
-function seeAllStudentRecords($pdo) {
-	$sql = "SELECT * FROM student_records";
-	$stmt = $pdo->prepare($sql);
-	$executeQuery = $stmt->execute();
-	if ($executeQuery) {
-		return $stmt->fetchAll();
-	}
+function updateCustomer($id, $name, $carModel, $mechanic, $advisor, $serviceType, $currentDate, $nextDate) {
+    global $pdo;
+    $stmt = $pdo->prepare('UPDATE customer_records SET CustomerName = ?, CustomerCarModel = ?, MechanicAssigned = ?, ServiceAdviserAssigned = ?, ServiceType = ?, CurrentServiceDate = ?, NextMaintenanceDate = ? WHERE CustomerID = ?');
+    $stmt->execute([$name, $carModel, $mechanic, $advisor, $serviceType, $currentDate, $nextDate, $id]);
 }
 
-function getStudentByID($pdo, $student_id) {
-	$sql = "SELECT * FROM student_records WHERE student_id = ?";
-	$stmt = $pdo->prepare($sql);
-	if ($stmt->execute([$student_id])) {
-		return $stmt->fetch();
-	}
+function deleteCustomer($id) {
+    global $pdo;
+    $stmt = $pdo->prepare('DELETE FROM customer_records WHERE CustomerID = ?');
+    $stmt->execute([$id]);
 }
-
-function updateAStudent($pdo, $student_id, $first_name, $last_name, 
-	$gender, $year_level, $section, $adviser, $religion) {
-
-	$sql = "UPDATE student_records 
-				SET first_name = ?, 
-					last_name = ?, 
-					gender = ?, 
-					year_level = ?, 
-					section = ?, 
-					adviser = ?, 
-					religion = ? 
-			WHERE student_id = ?";
-	$stmt = $pdo->prepare($sql);
-	
-	$executeQuery = $stmt->execute([$first_name, $last_name, $gender, 
-		$year_level, $section, $adviser, $religion, $student_id]);
-
-	if ($executeQuery) {
-		return true;
-	}
-}
-
-
-
-function deleteAStudent($pdo, $student_id) {
-
-	$sql = "DELETE FROM student_records WHERE student_id = ?";
-	$stmt = $pdo->prepare($sql);
-
-	$executeQuery = $stmt->execute([$student_id]);
-
-	if ($executeQuery) {
-		return true;
-	}
-
-}
-
-
-
-
-?>
