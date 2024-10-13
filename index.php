@@ -1,73 +1,102 @@
-<?php require_once 'core/dbConfig.php'; ?>
-<?php require_once 'core/models.php'; ?>
+<?php
+include 'dbconfig.php';
+
+if (isset($_POST['register'])) {
+    $name = $_POST['CustomerName'];
+    $carModel = $_POST['CustomerCarModel'];
+    $mechanic = $_POST['MechanicAssigned'];
+    $advisor = $_POST['ServiceAdviserAssigned'];
+    $serviceType = $_POST['ServiceType'];
+    $currentDate = $_POST['CurrentServiceDate'];
+    $nextDate = $_POST['NextMaintenanceDate'];
+
+    $stmt = $pdo->prepare('INSERT INTO customer_records (CustomerName, CustomerCarModel, MechanicAssigned, ServiceAdviserAssigned, ServiceType, CurrentServiceDate, NextMaintenanceDate) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$name, $carModel, $mechanic, $advisor, $serviceType, $currentDate, $nextDate]);
+
+    header('Location: index.php');
+}
+
+$searchKeyword = '';
+if (isset($_POST['search'])) {
+    $searchKeyword = $_POST['keyword'];
+    $stmt = $pdo->prepare('SELECT * FROM customer_records WHERE CustomerName LIKE ?');
+    $stmt->execute(['%' . $searchKeyword . '%']);
+} else {
+    $stmt = $pdo->query('SELECT * FROM customer_records');
+}
+$customers = $stmt->fetchAll();
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>CarFormance</title>
-	<style>
-		body { 
-			font-family: "Aptos";
-		}
-		input {
-			font-size: 1.5em;
-			height: 50px;
-			width: 200px;
-		}
-		table, th, td {
-		  border:1px solid black;
-		}
-	</style>
+    <title>Customer Records</title>
+    <style>
+        body, table {
+            font-family: 'Aptos', sans-serif;
+        }
+    </style>
 </head>
 <body>
-	<h3>Welcome to the CarFormance, a car business. Input your details below</h3>
+<h1>CarFormance</h1>
+<h3>A car family company</h3>
 
-    <!-- This area is for EMPLOYEES ONLY -->
+<form method="post">
+    <input type="text" name="keyword" value="<?php echo htmlspecialchars($searchKeyword); ?>" placeholder="Search by customer name">
+    <input type="submit" name="search" value="Search">
+</form>
 
-	<form action="core/handleForms.php" method="POST">
-		<p><label for="Customer">Customer</label> <input type="text" name="Customer"></p>
-		<p><label for="CarModel">Car Model</label> <input type="text" name="CarModel"></p>
-		<p><label for="Mechanic">Mechanic</label> <input type="text" name="Mechanic"></p>
-        <p><label for="ServiceAdviser">Service Adviser</label> <input type="text" name="Mechanic"></p>
-		<p><label for="ServiceType">service Type</label> <input type="text" name="ServiceType"></p>
-		<p><label for="NextMaintenance">Next Maintenance</label> <input type="text" name="NextMaintenance"></p>
-		<p><label for="Clearance">Clearance</label> <input type="text" name="Clearance"></p>
-			<input type="submit" name="insertNewStudentBtn">
-		</p>
-	</form>
+<h2>Register New Customer</h2>
+<h3>Enter details provided with customer's CarFormance card</h3>
+<form method="post">
+    <label for="CustomerName">Customer Name:</label>
+    <input type="text" name="CustomerName" required><br>
+    <label for="CustomerCarModel">Customer Car Model:</label>
+    <input type="text" name="CustomerCarModel" required><br>
+    <label for="MechanicAssigned">Mechanic Assigned:</label>
+    <input type="text" name="MechanicAssigned" required><br>
+    <label for="ServiceAdviserAssigned">Service Adviser Assigned:</label>
+    <input type="text" name="ServiceAdviserAssigned" required><br>
+    <label for="ServiceType">Service Type:</label>
+    <input type="text" name="ServiceType" required><br>
+    <label for="CurrentServiceDate">Current Service Date:</label>
+    <input type="date" name="CurrentServiceDate" required><br>
+    <label for="NextMaintenanceDate">Next Maintenance Date:</label>
+    <input type="date" name="NextMaintenanceDate" required><br>
+    <input type="submit" name="register" value="Register Customer">
+</form>
 
-	<table style="width:50%; margin-top: 50px;">
-	  <tr>
-	    <th>CarCustomerID</th>
-	    <th>CustomerName</th>
-	    <th>CarModel</th>
-	    <th>Mechanic</th>
-        <th>ServiceAdviser</th>
-	    <th>ServiceType</th>
-	    <th>NextMaintenance</th>
-	    <th>Clearance</th>
-	    <th>ServiceDate</th>
-	    <th>Action</th>
-	  </tr>
-
-	  <?php $seeAllCustomerRecords = seeAllCustomerRecords($pdo); ?>
-	  <?php foreach ($seeAllCustomerRecords as $row) { ?>
-	  <tr>
-	  	<td><?php echo $row['CarCustomerID']; ?></td>
-	  	<td><?php echo $row['Customer_name']; ?></td>
-	  	<td><?php echo $row['Car_model']; ?></td>
-	  	<td><?php echo $row['Mechanic_assigned']; ?></td>
-        <td><?php echo $row['Service_adviser']; ?></td>
-	  	<td><?php echo $row['Service_type']; ?></td>
-	  	<td><?php echo $row['Next_maintenance']; ?></td>
-	  	<td><?php echo $row['Service_date']; ?></td>
-	  	<td>
-	  		<a href="editcustomer.php?Customer_id=<?php echo $row['Customer_id'];?>">Edit</a>
-	  		<a href="deletecustomer.php?Customer_id=<?php echo $row['Customer_id'];?>">Delete</a>
-	  	</td>
-	  </tr>
-	  <?php } ?>
-	</table>
+<h2>Customer Records</h2>
+<table border="3">
+    <tr>
+        <th>Customer ID</th>
+        <th>Customer Name</th>
+        <th>Customer Car Model</th>
+        <th>Mechanic Assigned</th>
+        <th>Service Adviser Assigned</th>
+        <th>Service Type</th>
+        <th>Current Service Date</th>
+        <th>Next Maintenance Date</th>
+        <th>Actions</th>
+    </tr>
+    <?php foreach ($customers as $customer): ?>
+    <tr>
+        <td><?php echo $customer['CustomerID']; ?></td>
+        <td><?php echo $customer['CustomerName']; ?></td>
+        <td><?php echo $customer['CustomerCarModel']; ?></td>
+        <td><?php echo $customer['MechanicAssigned']; ?></td>
+        <td><?php echo $customer['ServiceAdviserAssigned']; ?></td>
+        <td><?php echo $customer['ServiceType']; ?></td>
+        <td><?php echo $customer['CurrentServiceDate']; ?></td>
+        <td><?php echo $customer['NextMaintenanceDate']; ?></td>
+        <td>
+            <a href="editcustomer.php?CustomerID=<?php echo $customer['CustomerID']; ?>">Edit</a>
+            <form action="deletecustomer.php" method="post" style="display:inline;">
+                <input type="hidden" name="CustomerID" value="<?php echo $customer['CustomerID']; ?>">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</table>
 </body>
 </html>
